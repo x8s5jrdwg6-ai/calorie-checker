@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    container_name: calorie_pg
+    environment:
+      POSTGRES_DB: calorie
+      POSTGRES_USER: calorie_user
+      POSTGRES_PASSWORD: calorie_pass
+    ports:
+      - "15432:5432"
+    volumes:
+      - calorie_pgdata:/var/lib/postgresql/data
+
+volumes:
+  calorie_pgdata:

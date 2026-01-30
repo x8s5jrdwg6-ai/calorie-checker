@@ -280,7 +280,6 @@ public class HomeController {
 	// 食べた！押下時
 	@PostMapping("/eat/record")
 	public String eatRecord(@RequestParam("flavorId") long flavorId,
-			@RequestParam(name="qty", required=false) Double qty,
 			RedirectAttributes ra) {
 		intakeSvc.insIntake(USER_ID, flavorId);
 		ra.addFlashAttribute("msg", "食べた！を記録しました。");

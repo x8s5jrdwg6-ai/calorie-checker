@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.http.Cookie;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -316,8 +318,8 @@ public class IntakeRepository {
 	 *	@return	登録件数（通常は1）
 	 */
 	public int insFoodMaker(String userId, String makerName) {
-		String sql = "INSERT INTO food_maker (maker_name, regist_user_id) VALUES (?, ?)";
-		return jdbc.update(sql, makerName, userId);
+		String sql = "INSERT INTO food_maker (maker_name, regist_user_id) VALUES (?, ?) RETURNING food_maker_id";
+		return jdbc.queryForObject(sql, int.class,  makerName, userId);
 	}
 	
 /*--------------------------------------
@@ -351,10 +353,10 @@ public class IntakeRepository {
 	 * 	@param	makerId	メーカーID
 	 *	@return	登録件数（通常は1）
 	 */
-	public long insFood(String userId, String foodName,long makerId) {
+	public int insFood(String userId, String foodName,long makerId) {
 		String sql = "INSERT INTO food (food_maker_id, food_name, regist_user_id) VALUES (?, ?, ?) RETURNING food_id";
 		// 登録件数を返す（通常 1）。失敗時は例外が投げられることが多い
-		return jdbc.queryForObject(sql, Long.class, makerId, foodName, userId);
+		return jdbc.queryForObject(sql, int.class, makerId, foodName, userId);
 	}
 	
 	/*
@@ -410,4 +412,33 @@ public class IntakeRepository {
 		return jdbc.update(sql, flavorName, foodId, calorie, protein, lipid, carbo, salt, userId);
 	}
 	
+	/*--------------------------------------
+ 		user_idの取得・登録処理
+	--------------------------------------*/
+	/*
+	 *	@param	c Cookie 
+	 *	@return	userId DBと照合したユーザーID
+	 */
+	public String chkUserId(Cookie c) {
+		String userId = "";
+		String sql = """
+				SELECT COUNT(*)
+				FROM users
+				WHERE user_id = ?
+			""";
+		if(jdbc.queryForObject(sql, int.class, c.getValue()) == 1) {
+			userId = c.getValue();
+		}
+		return userId;
+	}
+	
+	public void registUserId(String userId) {
+		String sql = """
+	    		INSERT INTO users(user_id, user_name, password, regist_date)
+	    		VALUES (?, ?, ?, CURRENT_DATE)
+	    		ON CONFLICT (user_id) DO NOTHING;
+	    """;
+		// usersに登録
+	    jdbc.update(sql, userId, "test", "test");
+	}
 }

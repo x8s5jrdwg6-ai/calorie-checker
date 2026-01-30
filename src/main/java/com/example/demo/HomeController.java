@@ -4,9 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-//import com.example.demo.HomeController.IntakeEditRow;
 
 @Controller
 public class HomeController {
@@ -26,52 +23,21 @@ public class HomeController {
 	private final JdbcTemplate jdbc;
 	private final IntakeService intakeSvc;
 
-//	// ログイン未実装なので固定（DBのregist_user_idと合わせる）
-//	private static final String USER_ID = "test";
-	
 	private static final String UID_COOKIE = "cc_uid";
 
+	// ユーザーIDの取得・登録処理を行う
 	private String resolveUserId(HttpServletRequest req, HttpServletResponse res) {
-	    // Cookieがあればそれを使う
-	    if (req.getCookies() != null) {
-	        for (Cookie c : req.getCookies()) {
-	            if (UID_COOKIE.equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank()) {
-	            	String sql = """
-	            				SELECT COUNT(*)
-	            				FROM users
-	            				WHERE user_id = ?
-	            			""";
-	            	if(jdbc.queryForObject(sql, int.class, c.getValue()) == 1) {
-	            		return c.getValue();
-	            	}
-	            }
-	        }
-	    }
+		// user_id取得処理
+		String userId = intakeSvc.chkUserId(req, UID_COOKIE);
 
-	    // 無ければ新規UUID
-	    String userId = UUID.randomUUID().toString();
-	    // usersに登録（既にあってもOK）
-	    jdbc.update("""
-	    		INSERT INTO users(user_id, user_name, password, regist_date)
-	    		VALUES (?, ?, ?, CURRENT_DATE)
-	    		ON CONFLICT (user_id) DO NOTHING;
-	    """, userId, "test", "test");
-
-	    // Cookie保存
-	    Cookie cookie = new Cookie(UID_COOKIE, userId);
-	    cookie.setPath("/");
-	    cookie.setHttpOnly(true);
-	    cookie.setMaxAge(60 * 60 * 24 * 365); // 1年
-
-	    // Renderはリバプロなのでヘッダを見る
-	    String xfProto = req.getHeader("X-Forwarded-Proto");
-	    boolean https = "https".equalsIgnoreCase(xfProto) || req.isSecure();
-	    cookie.setSecure(https);
-
-	    // SameSite=Lax（Servlet APIの都合で setAttribute 方式）
-	    cookie.setAttribute("SameSite", "Lax");
-
-	    res.addCookie(cookie);
+		if(!userId.isEmpty()) {
+			return userId;
+		}
+		
+		// 無ければ新規UUIDをuser_idとしてusersテーブルに登録
+		userId = intakeSvc.registUserId();
+		
+	    res.addCookie(intakeSvc.setCookie(UID_COOKIE, userId, req));
 	    return userId;
 	}
 	
@@ -102,9 +68,6 @@ public class HomeController {
             HttpServletResponse res) {
 		// user_id取得処理（仮）
 		String userId = resolveUserId(req, res);
-//		System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-//		System.out.println(userId);
-//		System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 		// 三項演算子（条件 ? 真のときの値 : 偽のときの値）
 		LocalDate targetDate = (date == null || date.isBlank()) ? LocalDate.now(): LocalDate.parse(date);
 		// modelに格納
@@ -117,8 +80,19 @@ public class HomeController {
 		model.addAttribute("todayDate", LocalDate.now().toString());
 		model.addAttribute("nextDate", targetDate.plusDays(1).toString());
 
-		// このreturnは画面を指定している（.../templates/home.html）
 		return "home";
+	}
+	
+	// お知らせ押下時
+	@GetMapping("/info")
+	public String info() {
+		return "information";
+	}
+	
+	// 使い方押下時
+	@GetMapping("/howto")
+	public String howToUse() {
+		return "how_to_use";
 	}
 	
 	// TOP画面：詳細押下時
@@ -304,9 +278,30 @@ public class HomeController {
 	/*--------------------------------------
 		メーカー登録画面
 	--------------------------------------*/
-	// メーカー登録画面で登録押下時
-	@PostMapping("/makers/create")
-	public String makerCreate(@RequestParam("makerName") String makerName, RedirectAttributes ra,
+//	// メーカー登録時
+//	@PostMapping("/makers/create")
+//	public String makerCreate(@RequestParam("makerName") String makerName, RedirectAttributes ra,
+//            HttpServletRequest req,
+//            HttpServletResponse res) {
+//		// user_id取得処理（仮）
+//		String userId = resolveUserId(req, res);
+//		
+//		// メーカー重複チェック
+//		if(intakeSvc.chkDepliMaker(userId, makerName) == -1) {
+//			ra.addFlashAttribute("msg", "同じメーカーが既に登録されています");
+//			return "redirect:/makers/new";
+//		}
+//		
+//		// メーカー登録
+//		intakeSvc.insFoodMaker(userId, makerName);
+//		ra.addFlashAttribute("msg", "メーカーを登録しました");
+//		return "redirect:/makers/new";
+//	}
+	
+	// メーカー登録時
+	@PostMapping("/makers/create-and-next")
+	public String makerCreateAndNext(@RequestParam("makerName") String makerName,
+			RedirectAttributes ra,
             HttpServletRequest req,
             HttpServletResponse res) {
 		// user_id取得処理（仮）
@@ -318,9 +313,11 @@ public class HomeController {
 			return "redirect:/makers/new";
 		}
 
-		intakeSvc.insFoodMaker(userId, makerName);
-		ra.addFlashAttribute("msg", "メーカーを登録しました");
-		return "redirect:/makers/new";
+		// メーカー登録
+		int foodMakerId = intakeSvc.insFoodMaker(userId, makerName);
+		
+		ra.addFlashAttribute("msg", "メーカーを登録しました。続けて食品情報を登録してください");
+		return "redirect:/foods/new?makerId=" + Integer.toString(foodMakerId);
 	}
 
 
@@ -329,7 +326,7 @@ public class HomeController {
 	--------------------------------------*/
 	// 食品登録時
 	@PostMapping("/foods/create-and-next")
-	public String foodCreateAndNext(@RequestParam("makerId") long makerId,
+	public String foodCreateAndNext(@RequestParam("makerId") int makerId,
 			@RequestParam("foodName") String foodName,
 			RedirectAttributes ra,
             HttpServletRequest req,
@@ -337,16 +334,16 @@ public class HomeController {
 		// user_id取得処理（仮）
 		String userId = resolveUserId(req, res);
 		
-		// 重複チェック
+		// 食品重複チェック
 		if(intakeSvc.chkDepliFood(userId, foodName, makerId) == -1) {
 			ra.addFlashAttribute("msg", "同じメーカー内に同名の食品が既に登録されています");
 			return "redirect:/foods/new";
 		}
 		// 食品情報登録
-		long foodId = intakeSvc.insFood(userId, foodName, makerId);
+		int foodId = intakeSvc.insFood(userId, foodName, makerId);
 
 		ra.addFlashAttribute("msg", "食品を登録しました。続けて栄養情報を登録してください");
-		return "redirect:/flavors/new?foodId=" + Long.toString(foodId);
+		return "redirect:/flavors/new?foodId=" + Integer.toString(foodId);
 	}
 
 	/*--------------------------------------

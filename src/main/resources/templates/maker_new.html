@@ -19,20 +19,22 @@
       <div th:if="${error}" class="error" th:text="${error}">
       </div>
       <div class="card" style="margin-top:10px;">
-        <form th:action="@{/makers/create}" method="post" class="stack">
+<!--        <form th:action="@{/makers/create}" method="post" class="stack">-->
+			<form th:action="@{/makers/create-and-next}" method="post" class="stack">
           <div class="stack">
             <label>メーカー名</label>
             <input class="input" type="text" name="makerName" required placeholder="例：Calbee">
           </div>
           <br>
-          <button class="btn btn-primary tap" type="submit">登録</button>
+<!--          <button class="btn btn-primary tap" type="submit">登録</button>-->
+		  <button class="btn btn-primary tap" type="submit">メーカーを登録して食品情報登録へ進む</button>
         </form>
       </div>
       <hr class="hr">
       <div class="stack">
         <a class="btn btn-ghost tap" th:href="@{/}">TOPへ戻る</a>
       </div>
-	    <!-- 下固定ナビ（iPhoneっぽさ爆上げ） -->
+	    <!-- 下固定ナビ -->
 	    <div style="height:72px;">
 	  </div>
     </div>

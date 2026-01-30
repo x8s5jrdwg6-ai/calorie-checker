@@ -9,11 +9,18 @@
   <link rel="stylesheet" th:href="@{/css/base.css}">
 <!--<link rel="stylesheet" th:href="@{/css/base.css(v=${#dates.createNow().time})}">-->
 </head>
-
 <body>
   <div class="page">
     <div class="container">
       <h1 class="page-title">間食カロリーチェッカー</h1>
+	  <div class="stack_2">
+	    <a class="btn btn-ghost tap" th:href="@{/info}">お知らせ</a>
+		<a class="btn btn-ghost tap" th:href="@{/howto}">使い方</a>
+	  </div>
+<!--	  <div class="stack" style="flex-direction: column;">-->
+    	
+<!-- 	  </div>-->
+	  
       <!--  <div class="page-sub">食べすぎないようにしましょう</div>-->
       <div th:if="${msg}" class="toast" th:text="${msg}">
       </div>

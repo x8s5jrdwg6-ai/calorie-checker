@@ -5,6 +5,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Service;
 
@@ -41,7 +45,6 @@ public class IntakeService {
 	}
 	
 	public int insFoodMaker(String userId, String makerName) {
-		if (makerName.isEmpty()) return -1;
 		return intakeRepo.insFoodMaker(userId, makerName);
 	}
 	
@@ -53,7 +56,7 @@ public class IntakeService {
 		return 0;
 	}
 	
-	public long insFood(String userId, String foodName, long makerId) {
+	public int insFood(String userId, String foodName, long makerId) {
 		return intakeRepo.insFood(userId, foodName, makerId);
 	}
 	
@@ -103,5 +106,44 @@ public class IntakeService {
 	
 	public List<Map<String, Object>> getFlavorList(String userId, long foodId){
 		return intakeRepo.getFlavorList(userId, foodId);
+	}
+	
+	public String chkUserId(HttpServletRequest req, String uidCookie) {
+		String userId = "";
+		if (req.getCookies() != null) {
+	        for (Cookie c : req.getCookies()) {
+	            if (uidCookie.equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank()) {
+	            	userId = intakeRepo.chkUserId(c);
+	            }
+	            if(!userId.isEmpty()) {
+	            	break;
+	            }
+	        }
+	    }
+		return userId;
+	}
+	
+	public String registUserId() {
+		String userId = UUID.randomUUID().toString();
+		intakeRepo.registUserId(userId);
+		return userId;
+	}
+	
+	public Cookie setCookie(String uidCookie, String userId, HttpServletRequest req) {
+		// Cookie保存
+	    Cookie cookie = new Cookie(uidCookie, userId);
+	    cookie.setPath("/");
+	    cookie.setHttpOnly(true);
+	    cookie.setMaxAge(60 * 60 * 24 * 365); // 1年
+
+	    // Renderはリバプロなのでヘッダを見る
+	    String xfProto = req.getHeader("X-Forwarded-Proto");
+	    boolean https = "https".equalsIgnoreCase(xfProto) || req.isSecure();
+	    cookie.setSecure(https);
+
+	    // SameSite=Lax（Servlet APIの都合で setAttribute 方式）
+	    cookie.setAttribute("SameSite", "Lax");
+	    
+	    return cookie;
 	}
 }

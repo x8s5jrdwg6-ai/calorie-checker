@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS nutrition (
   protein        numeric(10,1),
   lipid          numeric(10,1),
   carbo          numeric(10,1),
-  salt           numeric(10,1),
+  salt           numeric(10,2),
   regist_user_id varchar(36) NOT NULL,
   UNIQUE (regist_user_id, food_id, class_name)
 );

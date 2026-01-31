@@ -146,4 +146,8 @@ public class IntakeService {
 	    
 	    return cookie;
 	}
+	
+	public void updLastAccessDate(String userId) {
+		intakeRepo.updLastAccessDate(userId);
+	}
 }

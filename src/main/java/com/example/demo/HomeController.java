@@ -31,6 +31,8 @@ public class HomeController {
 		String userId = intakeSvc.chkUserId(req, UID_COOKIE);
 
 		if(!userId.isEmpty()) {
+			// 最終アクセス日時を更新
+			intakeSvc.updLastAccessDate(userId);
 			return userId;
 		}
 		

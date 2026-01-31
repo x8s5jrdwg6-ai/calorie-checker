@@ -1,8 +1,16 @@
+--CREATE TABLE IF NOT EXISTS users (
+--  user_id     varchar(36)  PRIMARY KEY,
+--  user_name   varchar(36),
+--  password    varchar(255) NOT NULL,
+--  regist_date date         NOT NULL
+--);
+
 CREATE TABLE IF NOT EXISTS users (
   user_id     varchar(36)  PRIMARY KEY,
   user_name   varchar(36),
-  password    varchar(255) NOT NULL,
-  regist_date date         NOT NULL
+  password    varchar(255) ,
+  regist_date timestamp DEFAULT now(),
+  last_access_date timestamp DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS food_maker (

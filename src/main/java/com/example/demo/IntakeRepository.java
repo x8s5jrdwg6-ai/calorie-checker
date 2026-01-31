@@ -21,6 +21,7 @@ public class IntakeRepository {
 	public IntakeRepository(JdbcTemplate jdbc) {
 		this.jdbc = jdbc;
 	}
+	
 /*--------------------------------------
  	home画面
 --------------------------------------*/
@@ -413,7 +414,7 @@ public class IntakeRepository {
 	}
 	
 	/*--------------------------------------
- 		user_idの取得・登録処理
+ 		user_idの取得・登録・更新処理
 	--------------------------------------*/
 	/*
 	 *	@param	c Cookie 
@@ -434,11 +435,20 @@ public class IntakeRepository {
 	
 	public void registUserId(String userId) {
 		String sql = """
-	    		INSERT INTO users(user_id, user_name, password, regist_date)
-	    		VALUES (?, ?, ?, CURRENT_DATE)
+	    		INSERT INTO users(user_id)
+	    		VALUES (?)
 	    		ON CONFLICT (user_id) DO NOTHING;
-	    """;
+			""";
 		// usersに登録
-	    jdbc.update(sql, userId, "test", "test");
+	    jdbc.update(sql, userId);
+	}
+	
+	public void updLastAccessDate(String userId) {
+		String sql = """
+				UPDATE users
+				SET last_access_date = CURRENT_TIMESTAMP
+				WHERE user_id = ?
+			""";
+		jdbc.update(sql, userId);
 	}
 }

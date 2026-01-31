@@ -4,7 +4,7 @@
 <head>
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta charset="UTF-8">
-  <title>間食カロリーチェッカー - 食品情報登録</title>
+  <title>カロリーチェッカー - 食品情報登録</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="stylesheet" th:href="@{/css/base.css}">
 </head>
@@ -14,10 +14,9 @@
     <div class="container">
       <div class="page-title">食品登録</div>
       <div class="page-sub">メーカーを選んで食品情報を登録します</div>
-      <div th:if="${msg}" class="toast" th:text="${msg}">
-      </div>
-      <div th:if="${error}" class="error" th:text="${error}">
-      </div>
+      <div th:if="${msg}" class="toast" th:text="${msg}"></div>
+      <div th:if="${errorMsg}" style="font-weight: bold; color: red;" class="toast" th:text="${errorMsg}"></div>
+      <div th:if="${error}" class="error" th:text="${error}"></div>
       <div class="card" style="margin-top:10px;">
         <form th:action="@{/foods/create-and-next}" method="post" class="stack">
           <div class="stack">

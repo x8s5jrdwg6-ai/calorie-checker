@@ -299,15 +299,17 @@ public class IntakeRepository {
 	 * 	@param	makerName	登録するメーカー名
 	 *	@return	重複がなければ0。重複がある場合は重複件数
 	 */
-	public int chkDepliMaker(String userId, String makerName) {
+	public boolean chkDepliMaker(String userId, String makerName) {
 		String sql = """
-				SELECT COUNT(*)
-				FROM food_maker
+				SELECT EXISTS(
+					SELECT 1
+					FROM food_maker
 				WHERE regist_user_id = ?
 					AND maker_name = ?
-				""";
-		// 重複がなければ0を返す
-		return jdbc.queryForObject(sql, int.class, userId, makerName);
+				)
+			""";
+		// 重複があればtrue、なければfalseを返す
+		return jdbc.queryForObject(sql, Boolean.class, userId, makerName);
 	}
 	
 	
@@ -334,16 +336,18 @@ public class IntakeRepository {
 	 * 	@param	makerId	メーカーID
 	 *	@return	重複がなければ0。重複がある場合は重複件数
 	 */
-	public int chkDepliFood(String userId, String foodName, long makerId) {
+	public boolean chkDepliFood(String userId, String foodName, long makerId) {
 		String sql = """
-				SELECT COUNT(*)
-				FROM food
-				WHERE regist_user_id = ?
-					AND food_name = ?
-					AND food_maker_id = ?
-				""";
-		// 重複がなければ0を返す
-		return jdbc.queryForObject(sql, int.class, userId, foodName, makerId);
+				SELECT EXISTS(
+					SELECT 1
+					FROM food
+					WHERE regist_user_id = ?
+						AND food_name = ?
+						AND food_maker_id = ?
+				)
+			""";
+		// 重複があればtrue、なければfalseを返す
+		return jdbc.queryForObject(sql, Boolean.class, userId, foodName, makerId);
 	}
 	
 	/*
@@ -384,16 +388,18 @@ public class IntakeRepository {
 	 * 	@param	foodId	食品ID
 	 *	@return	重複がなければ0。重複がある場合は重複件数
 	 */
-	public int chkDepliFlavor(String userId, String flavorName, long foodId) {
+	public boolean chkDepliFlavor(String userId, String flavorName, long foodId) {
 		String sql = """
-				SELECT COUNT(*)
+				SELECT EXISTS(
+					SELECT 1
 				FROM flavor
 				WHERE regist_user_id = ?
 					AND flavor_name = ?
 					AND food_id = ?
-				""";
-		// 重複がなければ0を返す
-		return jdbc.queryForObject(sql, int.class, userId, flavorName, foodId);
+				)
+			""";
+		// 重複があればtrue、なければfalseを返す
+		return jdbc.queryForObject(sql, Boolean.class, userId, flavorName, foodId);
 	}
 	
 	/*
@@ -423,11 +429,13 @@ public class IntakeRepository {
 	public String chkUserId(Cookie c) {
 		String userId = "";
 		String sql = """
-				SELECT COUNT(*)
-				FROM users
-				WHERE user_id = ?
+				SELECT EXISTS(
+					SELECT 1
+					FROM users
+					WHERE user_id = ?
+				)
 			""";
-		if(jdbc.queryForObject(sql, int.class, c.getValue()) == 1) {
+		if(jdbc.queryForObject(sql, Boolean.class, c.getValue())) {
 			userId = c.getValue();
 		}
 		return userId;

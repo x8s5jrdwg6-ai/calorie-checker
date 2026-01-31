@@ -4,7 +4,7 @@
 <head>
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta charset="UTF-8">
-  <title>間食カロリーチェッカー - TOP</title>
+  <title>カロリーチェッカー - TOP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="stylesheet" th:href="@{/css/base.css}">
 <!--<link rel="stylesheet" th:href="@{/css/base.css(v=${#dates.createNow().time})}">-->
@@ -12,7 +12,7 @@
 <body>
   <div class="page">
     <div class="container">
-      <h1 class="page-title">間食カロリーチェッカー</h1>
+      <h1 class="page-title">カロリーチェッカー</h1>
 	  <div class="stack_2">
 	    <a class="btn btn-ghost tap" th:href="@{/info}">お知らせ</a>
 		<a class="btn btn-ghost tap" th:href="@{/howto}">使い方</a>
@@ -22,7 +22,7 @@
 <!-- 	  </div>-->
 	  
       <!--  <div class="page-sub">食べすぎないようにしましょう</div>-->
-      <div th:if="${msg}" class="toast" th:text="${msg}">
+      <div th:if="${msg}" class="toast" th:text="${msg}" style="text-align: center;">
       </div>
       <!-- 日付ナビ -->
       <div class="card" style="margin-top:10px;">
@@ -47,7 +47,7 @@
       </div>
       <!-- 履歴 -->
       <div class="card" style="margin-top:12px;">
-        <div class="muted" style="font-weight:800; margin-bottom:8px;">履歴</div>
+        <div class="muted" style="font-weight:800; margin-bottom:8px;">食べた！履歴</div>
         <div th:if="${#lists.isEmpty(targetDateAteRecords)}" class="muted">まだ記録がありません</div>
         <div th:if="${!#lists.isEmpty(targetDateAteRecords)}" class="stack">
           <div th:each="t : ${targetDateAteRecords}" class="card" style="padding:12px;">

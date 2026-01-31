@@ -337,9 +337,9 @@ public class HomeController {
 		// user_id取得処理（仮）
 		String userId = resolveUserId(req, res);
 		
-		// メーカー重複チェック
-		if(intakeSvc.chkDepliMaker(userId, makerName) == -1) {
-			ra.addFlashAttribute("msg", "同じメーカーが既に登録されています");
+		// メーカー重複チェック true：重複なし false：重複あり
+		if(!intakeSvc.chkDepliMaker(userId, makerName)) {
+			ra.addFlashAttribute("errorMsg", "同じメーカーが既に登録されています");
 			return "redirect:/makers/new";
 		}
 
@@ -364,9 +364,9 @@ public class HomeController {
 		// user_id取得処理（仮）
 		String userId = resolveUserId(req, res);
 		
-		// 食品重複チェック
-		if(intakeSvc.chkDepliFood(userId, foodName, makerId) == -1) {
-			ra.addFlashAttribute("msg", "同じメーカー内に同名の食品が既に登録されています");
+		// 食品重複チェック true：重複なし false：重複あり
+		if(!intakeSvc.chkDepliFood(userId, foodName, makerId)) {
+			ra.addFlashAttribute("errorMsg", "同じメーカー内に同名の食品が既に登録されています");
 			return "redirect:/foods/new";
 		}
 		// 食品情報登録
@@ -401,9 +401,9 @@ public class HomeController {
 //			flavorName = "プレーン";
 //		}
 
-		// 重複チェック
-		if(intakeSvc.chkDepliFlavor(userId, flavorName, foodId) == -1) {
-			ra.addFlashAttribute("msg", "同じ分類の栄養情報が既に登録されています");
+		// 栄養情報重複チェック true：重複なし false：重複あり
+		if(!intakeSvc.chkDepliFlavor(userId, flavorName, foodId)) {
+			ra.addFlashAttribute("errorMsg", "同じ分類の栄養情報が既に登録されています");
 			return "redirect:/flavors/new";
 		}
 

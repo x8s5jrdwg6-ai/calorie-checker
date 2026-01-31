@@ -48,12 +48,12 @@ public class IntakeService {
 		return intakeRepo.insFoodMaker(userId, makerName);
 	}
 	
-	public int chkDepliFood(String userId, String foodName, long makerId) {
+	public boolean chkDepliFood(String userId, String foodName, long makerId) {
 		//重複チェック
-		if(intakeRepo.chkDepliFood(userId, foodName, makerId) != 0) {
-			return -1;	// エラー
+		if(intakeRepo.chkDepliFood(userId, foodName, makerId)) {
+			return false;	// エラー
 		}
-		return 0;
+		return true;
 	}
 	
 	public int insFood(String userId, String foodName, long makerId) {
@@ -64,19 +64,19 @@ public class IntakeService {
 		return intakeRepo.getRegistFoodId(userId, foodName, makerId);
 	}
 	
-	public int chkDepliMaker(String userId, String makerName) {
-		if(intakeRepo.chkDepliMaker(userId, makerName) != 0) {
-			return -1;	// エラー
+	public boolean chkDepliMaker(String userId, String makerName) {
+		if(intakeRepo.chkDepliMaker(userId, makerName)) {
+			return false;	// エラー
 		}
-		return 0;
+		return true;
 	}
 	
-	public int chkDepliFlavor(String userId, String flavorName, long foodId) {
+	public boolean chkDepliFlavor(String userId, String flavorName, long foodId) {
 		//重複チェック
-		if(intakeRepo.chkDepliFlavor(userId, flavorName, foodId) != 0) {
-			return -1;	// エラー
+		if(intakeRepo.chkDepliFlavor(userId, flavorName, foodId)) {
+			return false;	// エラー
 		}
-		return 0;
+		return true;
 	}
 	
 	public void insFlavor(String userId, String flavorName, long foodId, int calorie, Double protein, Double lipid, Double carbo, Double salt) {

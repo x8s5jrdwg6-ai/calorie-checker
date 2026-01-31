@@ -58,7 +58,7 @@
                 <div style="font-weight:900;">
                   <span th:text="${t.foodName}">food</span>
                   <span class="muted">（</span>
-                  <span th:text="${t.flavorName}">flavor</span>
+                  <span th:text="${t.className}">class</span>
                   <span class="muted">）</span>
                 </div>
                 <div class="muted">
@@ -86,7 +86,7 @@
         <div class="nav-emoji">🧃</div>
         <div class="nav-label">食品情報登録</div>
       </a>
-      <a class="nav-item" th:href="@{/flavors/new}">
+      <a class="nav-item" th:href="@{/nutritions/new}">
         <div class="nav-emoji">🧂</div>
         <div class="nav-label">栄養情報登録</div>
       </a>

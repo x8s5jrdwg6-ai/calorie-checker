@@ -23,7 +23,7 @@
       <div class="card" th:if="${!#lists.isEmpty(makers)}">
         <div class="muted" style="font-weight:800; margin-bottom:10px;">メーカー</div>
         <div class="grid">
-          <a class="tile tap" th:each="m : ${makers}" th:href="@{/eat/foods(makerId=${m.food_maker_id})}">
+          <a class="tile tap" th:each="m : ${makers}" th:href="@{/eat/foods(makerId=${m.maker_id})}">
             <div class="tile-title" th:text="${m.maker_name}">maker</div>
           </a>
         </div>
@@ -49,7 +49,7 @@
         <div class="nav-emoji">🧃</div>
         <div class="nav-label">食品情報登録</div>
       </a>
-      <a class="nav-item" th:href="@{/flavors/new}">
+      <a class="nav-item" th:href="@{/nutritions/new}">
         <div class="nav-emoji">🧂</div>
         <div class="nav-label">栄養情報登録</div>
       </a>

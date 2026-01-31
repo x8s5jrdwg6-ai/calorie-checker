@@ -71,16 +71,16 @@ public class IntakeService {
 		return true;
 	}
 	
-	public boolean chkDepliNutrition(String userId, String nutritionName, long foodId) {
+	public boolean chkDepliNutrition(String userId, String className, long foodId) {
 		//重複チェック
-		if(intakeRepo.chkDepliNutrition(userId, nutritionName, foodId)) {
+		if(intakeRepo.chkDepliNutrition(userId, className, foodId)) {
 			return false;	// エラー
 		}
 		return true;
 	}
 	
-	public void insNutrition(String userId, String nutritionName, long foodId, int calorie, Double protein, Double lipid, Double carbo, Double salt) {
-		intakeRepo.insNutrition(userId, nutritionName, foodId, calorie, protein, lipid, carbo, salt);
+	public void insNutrition(String userId, String className, long foodId, int calorie, Double protein, Double lipid, Double carbo, Double salt) {
+		intakeRepo.insNutrition(userId, className, foodId, calorie, protein, lipid, carbo, salt);
 		
 	}
 	

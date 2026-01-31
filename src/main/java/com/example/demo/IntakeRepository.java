@@ -125,7 +125,7 @@ public class IntakeRepository {
 			        map.put("qty", rs.getInt("qty"));
 			        map.put("makerName", rs.getString("maker_name"));
 			        map.put("foodName", rs.getString("food_name"));
-			        map.put("nutritionName", rs.getString("class_name"));
+			        map.put("className", rs.getString("class_name"));
 			        map.put("calorie", rs.getInt("calorie"));
 			        map.put("protein", rs.getDouble("protein"));
 			        map.put("lipid", rs.getDouble("lipid"));
@@ -209,7 +209,7 @@ public class IntakeRepository {
 			        Map<String, Object> map = new HashMap<>();
 			        map.put("foodId", rs.getLong("food_id"));
 			        map.put("foodName", rs.getString("food_name"));
-			        map.put("foodMakerId", rs.getString("maker_id"));
+			        map.put("makerId", rs.getString("maker_id"));
 			        map.put("makerName", rs.getString("maker_name"));
 			        return map;
 			    }
@@ -384,11 +384,11 @@ public class IntakeRepository {
 	 * 	「登録」押下
 	 * 	ユーザーごとに味名の重複チェックを行うメソッド
 	 *	@param	userId ユーザーID 
-	 * 	@param	nutritionName	登録する味名
+	 * 	@param	className	登録する分類名
 	 * 	@param	foodId	食品ID
 	 *	@return	重複がなければ0。重複がある場合は重複件数
 	 */
-	public boolean chkDepliNutrition(String userId, String nutritionName, long foodId) {
+	public boolean chkDepliNutrition(String userId, String className, long foodId) {
 		String sql = """
 				SELECT EXISTS(
 					SELECT 1
@@ -399,14 +399,14 @@ public class IntakeRepository {
 				)
 			""";
 		// 重複があればtrue、なければfalseを返す
-		return jdbc.queryForObject(sql, Boolean.class, userId, nutritionName, foodId);
+		return jdbc.queryForObject(sql, Boolean.class, userId, className, foodId);
 	}
 	
 	/*
 	 * 	「登録」押下
 	 * 	makerテーブルに登録を行うメソッド
 	 *	@param	userId ユーザーID 
-	 * 	@param	nutritionName	登録する味名
+	 * 	@param	className	登録する分類名
 	 *	@param	foodId	食品ID
 	 *	@param	calorie	カロリー
 	 *	@param	protein	たんぱく質
@@ -414,9 +414,9 @@ public class IntakeRepository {
 	 *	@param	salt	塩分
 	 *	@return	登録件数（通常は1）
 	 */
-	public int insNutrition(String userId, String nutritionName, long foodId, int calorie, Double protein, Double lipid, Double carbo, Double salt) {
+	public int insNutrition(String userId, String className, long foodId, int calorie, Double protein, Double lipid, Double carbo, Double salt) {
 		String sql = "INSERT INTO nutrition (class_name, food_id, calorie, protein, lipid, carbo, salt, regist_user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-		return jdbc.update(sql, nutritionName, foodId, calorie, protein, lipid, carbo, salt, userId);
+		return jdbc.update(sql, className, foodId, calorie, protein, lipid, carbo, salt, userId);
 	}
 	
 	/*--------------------------------------

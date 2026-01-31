@@ -23,7 +23,7 @@
             <label>メーカー</label>
             <select name="makerId" required>
               <option value="" disabled th:selected="${selectedMakerId == null}">選択してください</option>
-              <option th:each="m : ${makers}" th:value="${m.food_maker_id}" th:text="${m.maker_name}" th:selected="${selectedMakerId != null and m.food_maker_id == selectedMakerId}">
+              <option th:each="m : ${makers}" th:value="${m.maker_id}" th:text="${m.maker_name}" th:selected="${selectedMakerId != null and m.maker_id == selectedMakerId}">
               </option>
             </select>
           </div>
@@ -58,7 +58,7 @@
       <div class="nav-emoji">🧃</div>
       <div class="nav-label">食品情報登録</div>
     </a>
-    <a class="nav-item" th:href="@{/flavors/new}">
+    <a class="nav-item" th:href="@{/nutritions/new}">
       <div class="nav-emoji">🧂</div>
       <div class="nav-label">栄養情報登録</div>
     </a>

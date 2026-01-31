@@ -52,7 +52,7 @@ public class HomeController {
 	/*--------------------------------------
 		record
 	--------------------------------------*/
-	public record IntakeRow(long intakeId, String eatenDate, String eatenTime, double qty, String foodName, String nutritionName, int calorie) {
+	public record IntakeRow(long intakeId, String eatenDate, String eatenTime, double qty, String foodName, String className, int calorie) {
 		public int kcalTotal() {
 			return (int) Math.round(calorie * qty);
 		}
@@ -123,7 +123,7 @@ public class HomeController {
 		model.addAttribute("eatenDatetime", (map.get("eatenDate") + " " + map.get("eatenTime")));
 		model.addAttribute("makerName", map.get("makerName"));
 		model.addAttribute("foodName", map.get("foodName"));
-		model.addAttribute("nutritionName", map.get("nutritionName"));
+		model.addAttribute("className", map.get("className"));
 		model.addAttribute("calorie", map.get("calorie"));
 		model.addAttribute("protein", map.get("protein"));
 		model.addAttribute("lipid", map.get("lipid"));
@@ -155,7 +155,7 @@ public class HomeController {
 		model.addAttribute("eatenDate", (map.get("eatenDate")));
 		model.addAttribute("eatenTime", (map.get("eatenTime")));
 		model.addAttribute("foodName", map.get("foodName"));
-		model.addAttribute("nutritionName", map.get("nutritionName"));
+		model.addAttribute("className", map.get("className"));
 		model.addAttribute("calorie", map.get("calorie"));
 
 		return "intake_edit";
@@ -238,7 +238,7 @@ public class HomeController {
 		
 		// メーカー一覧を取得
 		List<Map<String, Object>> makers = jdbc.queryForList(
-				"SELECT food_maker_id, maker_name FROM food_maker WHERE regist_user_id=? ORDER BY maker_name",
+				"SELECT maker_id, maker_name FROM maker WHERE regist_user_id=? ORDER BY maker_name",
 				userId
 				);
 
@@ -382,7 +382,7 @@ public class HomeController {
 	@PostMapping("/nutritions/create")
 	public String nutritionCreate(
 			@RequestParam("foodId") long foodId,
-			@RequestParam("nutritionName") String nutritionName,
+			@RequestParam("className") String className,
 			@RequestParam("calorie") int calorie,
 			@RequestParam(name="protein", required=false) Double protein,
 			@RequestParam(name="lipid", required=false) Double lipid,
@@ -402,13 +402,13 @@ public class HomeController {
 //		}
 
 		// 栄養情報重複チェック true：重複なし false：重複あり
-		if(!intakeSvc.chkDepliNutrition(userId, nutritionName, foodId)) {
+		if(!intakeSvc.chkDepliNutrition(userId, className, foodId)) {
 			ra.addFlashAttribute("errorMsg", "同じ分類の栄養情報が既に登録されています");
 			return "redirect:/nutritions/new";
 		}
 
 		// 栄養情報登録
-		intakeSvc.insNutrition(userId, nutritionName, foodId, calorie, protein, lipid, carbo, salt);
+		intakeSvc.insNutrition(userId, className, foodId, calorie, protein, lipid, carbo, salt);
 
 		ra.addFlashAttribute("msg", "栄養情報を登録しました");
 		return "redirect:/nutritions/new";

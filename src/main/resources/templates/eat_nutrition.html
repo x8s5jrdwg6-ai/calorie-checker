@@ -20,27 +20,27 @@
         <div class="muted" style="margin-top:6px;">食品</div>
         <div style="font-weight:900;" th:text="${header.foodName}">food</div>
         <div class="row" style="margin-top:10px;">
-          <a class="btn btn-ghost tap" th:href="@{/eat/foods(makerId=${header.foodMakerId})}">← 食品選択へ戻る</a>
-          <a class="btn btn-primary tap" th:href="@{/flavors/new(foodId=${header.foodId})}">栄養情報登録</a>
+          <a class="btn btn-ghost tap" th:href="@{/eat/foods(makerId=${header.makerId})}">← 食品選択へ戻る</a>
+          <a class="btn btn-primary tap" th:href="@{/nutritions/new(foodId=${header.foodId})}">栄養情報登録</a>
         </div>
       </div>
       <div th:if="${error}" class="error" th:text="${error}">
       </div>
-      <div class="card" th:if="${#lists.isEmpty(flavors)}">
-        <div class="muted">分類が未登録です</div>
+      <div class="card" th:if="${#lists.isEmpty(nutritions)}">
+        <div class="muted">栄養情報が未登録です</div>
       </div>
-      <div class="card" th:if="${!#lists.isEmpty(flavors)}">
+      <div class="card" th:if="${!#lists.isEmpty(nutritions)}">
         <div class="muted" style="font-weight:800; margin-bottom:10px;">分類一覧</div>
         <div class="stack">
-          <div class="card" th:each="fl : ${flavors}" style="padding:12px;">
+          <div class="card" th:each="fl : ${nutritions}" style="padding:12px;">
             <div class="row" style="justify-content:space-between; align-items:flex-start;">
               <div class="stack" style="gap:6px;">
-                <div style="font-weight:900;" th:text="${fl.flavor_name}">サラダ</div>
+                <div style="font-weight:900;" th:text="${fl.class_name}">サラダ</div>
                 <div class="muted">
                   <span th:text="${fl.calorie}">0</span>kcal</div>
               </div>
               <form th:action="@{/eat/record}" method="post" style="margin:0;">
-                <input type="hidden" name="flavorId" th:value="${fl.flavor_id}">
+                <input type="hidden" name="nutritionId" th:value="${fl.nutrition_id}">
                 <button class="btn btn-primary tap" type="submit">食べた！</button>
               </form>
             </div>
@@ -68,7 +68,7 @@
         <div class="nav-emoji">🧃</div>
         <div class="nav-label">食品情報登録</div>
       </a>
-      <a class="nav-item" th:href="@{/flavors/new}">
+      <a class="nav-item" th:href="@{/nutritions/new}">
         <div class="nav-emoji">🧂</div>
         <div class="nav-label">栄養情報登録</div>
       </a>

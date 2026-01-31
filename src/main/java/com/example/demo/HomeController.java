@@ -81,9 +81,12 @@ public class HomeController {
 		model.addAttribute("prevDate", targetDate.minusDays(1).toString());
 		model.addAttribute("todayDate", LocalDate.now().toString());
 		model.addAttribute("nextDate", targetDate.plusDays(1).toString());
+		
+		model.addAttribute("forDetailDate", targetDate.toString());
 
 		return "home";
 	}
+	
 	
 	// お知らせ押下時
 	@GetMapping("/info")
@@ -99,7 +102,9 @@ public class HomeController {
 	
 	// TOP画面：詳細押下時
 	@GetMapping("/intake/detail")
-	public String intakeDetail(@RequestParam("intakeId") long intakeId, Model model,
+	public String intakeDetail(@RequestParam("intakeId") long intakeId,
+			@RequestParam("date") String date,
+			Model model,
             HttpServletRequest req,
             HttpServletResponse res) {
 		// user_id取得処理（仮）
@@ -112,6 +117,8 @@ public class HomeController {
 			return "home";
 		}
 		
+		model.addAttribute("targetDate", date);
+		model.addAttribute("targetId", map.get("intakeId"));
 		model.addAttribute("intakeId", map.get("intakeId"));
 		model.addAttribute("eatenDatetime", (map.get("eatenDate") + " " + map.get("eatenTime")));
 		model.addAttribute("makerName", map.get("makerName"));
@@ -128,7 +135,9 @@ public class HomeController {
 	
 	// 詳細画面：編集押下時
 	@GetMapping("/intake/edit")
-	public String intakeEdit(@RequestParam("intakeId") long intakeId, Model model,
+	public String intakeEdit(@RequestParam("intakeId") long intakeId,
+			@RequestParam("date") String date,
+			Model model,
             HttpServletRequest req,
             HttpServletResponse res) {
 		// user_id取得処理（仮）
@@ -141,6 +150,7 @@ public class HomeController {
 			return "home";
 		}
 				
+		model.addAttribute("targetDate", date);
 		model.addAttribute("intakeId", map.get("intakeId"));
 		model.addAttribute("eatenDate", (map.get("eatenDate")));
 		model.addAttribute("eatenTime", (map.get("eatenTime")));
@@ -267,13 +277,31 @@ public class HomeController {
 	// 削除押下時
 	@PostMapping("/intake/delete")
 	public String delete(@RequestParam("intakeId") long intakeId,
+			@RequestParam("hiddenDate") String hiddenDate,
             HttpServletRequest req,
             HttpServletResponse res) {
 		// user_id取得処理（仮）
 		String userId = resolveUserId(req, res);
 		
 		intakeSvc.delIntake(userId, intakeId);
-		return "redirect:/";
+		return "redirect:/?date=" + hiddenDate;
+	}
+	
+	@PostMapping("/intake/update")
+	public String intakeUpdate(
+			@RequestParam("intakeId") long intakeId,
+			@RequestParam("eatenDate") LocalDate eatenDate,
+			@RequestParam("eatenTime") LocalTime eatenTime,
+			@RequestParam("hiddenDate") String hiddenDate,
+            HttpServletRequest req,
+            HttpServletResponse res
+			){
+		// user_id取得処理（仮）
+		String userId = resolveUserId(req, res);
+		
+		intakeSvc.updIntake(userId, intakeId, eatenDate, eatenTime);
+
+		return "redirect:/intake/detail?intakeId=" + intakeId + "&date=" + hiddenDate;
 	}
 
 
@@ -401,22 +429,6 @@ public class HomeController {
 		intakeSvc.insIntake(userId, flavorId);
 		ra.addFlashAttribute("msg", "食べた！を記録しました。");
 		return "redirect:/";
-	}
-
-	@PostMapping("/intake/update")
-	public String intakeUpdate(
-			@RequestParam("intakeId") long intakeId,
-			@RequestParam("eatenDate") LocalDate eatenDate,
-			@RequestParam("eatenTime") LocalTime eatenTime,
-            HttpServletRequest req,
-            HttpServletResponse res
-			){
-		// user_id取得処理（仮）
-		String userId = resolveUserId(req, res);
-		
-		intakeSvc.updIntake(userId, intakeId, eatenDate, eatenTime);
-
-		return "redirect:/intake/detail?intakeId=" + intakeId;
 	}
 
 }

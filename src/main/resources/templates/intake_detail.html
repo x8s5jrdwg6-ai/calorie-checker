@@ -22,9 +22,10 @@
             <div style="font-weight:900;" th:text="${#strings.substring(eatenDatetime, 0, 16)}">2026-01-28 12:34</div>
           </div>
           <div class="row" style="margin: 0 0 0 auto;">
-            <a class="btn btn-primary tap" th:href="@{/intake/edit(intakeId=${intakeId})}">編集</a>
+            <a class="btn btn-primary tap" th:href="@{/intake/edit(intakeId=${intakeId}, (date=${targetDate}))}">編集</a>
             <form th:action="@{/intake/delete}" method="post" style="margin:0;">
               <input type="hidden" name="intakeId" th:value="${intakeId}">
+			  <input type="hidden" name="hiddenDate" th:value="${targetDate}">
               <button class="btn btn-danger tap" type="submit" onclick="return confirm('この履歴を削除しますか？');">削除</button>
             </form>
           </div>
@@ -69,7 +70,7 @@
       </div>
 	  <hr class="hr">
       <div class="stack">
-        <a class="btn btn-ghost tap" th:href="@{/}">TOPへ戻る</a>
+        <a class="btn btn-ghost tap" th:href="@{/(date=${targetDate})}">戻る</a>
       </div>
       <div style="height:72px;">
       </div>

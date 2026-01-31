@@ -33,10 +33,11 @@
           <div class="stack">
             <label>時間</label>
             <input class="input" type="time" name="eatenTime" th:value="${#strings.substring(eatenTime, 0, 5)}" required>
+			<input type="hidden" name="hiddenDate" th:value="${targetDate}" required>
           </div>
           <br>
           <button class="btn btn-primary tap" type="submit">更新</button>
-          <a class="btn btn-ghost tap" th:href="@{/intake/detail(intakeId=${intakeId})}">キャンセル</a>
+          <a class="btn btn-ghost tap" th:href="@{/intake/detail(intakeId=${intakeId}, date=${targetDate})}">キャンセル</a>
         </form>
       </div>
       <div style="height:72px;">

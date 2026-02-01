@@ -180,7 +180,7 @@ public class IntakeRepository {
 	 * 	「食べた！」押下
 	 * 	intakeテーブルに登録を行うメソッド
 	 *	@param	userId ユーザーID  
-	 * 	@param	nutritionId 味ID 
+	 * 	@param	nutritionId 栄養ID 
 	 *	@param	eatenDate 食べた日付
 	 *	@param	eatenTime 食べた時刻
 	 *	@return	登録件数（通常は1）
@@ -192,29 +192,6 @@ public class IntakeRepository {
 		     """;
 		// 登録件数を返す（通常 1）。失敗時は例外が投げられることが多い
 		return jdbc.update(sql, userId, nutritionId, eatenDate, eatenTime);
-	}
-	
-	public Map<String, Object> getHeaderInfo (String userId, long foodId) {
-		String sql = """
-				SELECT f.food_id, f.food_name, m.maker_id, m.maker_name
-				FROM food f
-				JOIN maker m ON m.maker_id = f.maker_id
-				WHERE f.food_id = ? AND f.regist_user_id = ?
-			""";
-		
-		Map<String, Object> headerInfo = jdbc.queryForObject(
-			    sql,
-			    new Object[]{ foodId, userId },
-			    (rs, rowNum) -> {
-			        Map<String, Object> map = new HashMap<>();
-			        map.put("foodId", rs.getLong("food_id"));
-			        map.put("foodName", rs.getString("food_name"));
-			        map.put("makerId", rs.getString("maker_id"));
-			        map.put("makerName", rs.getString("maker_name"));
-			        return map;
-			    }
-			);
-		return headerInfo;
 	}
 	
 	/*
@@ -253,11 +230,41 @@ public class IntakeRepository {
 	}
 	
 	/*
+	 * 	食べた登録画面：②：画面表示時
+	 * 	ユーザーIDと食品IDに紐づく食品情報とメーカ情報を取得するメソッド
+	 *	@param	userId ユーザーID  
+	 * 	@param	foodId 食品ID 
+	 *	@return	Map<String, Object>
+	 */
+	public Map<String, Object> getHeaderInfo (String userId, long foodId) {
+		String sql = """
+				SELECT f.food_id, f.food_name, m.maker_id, m.maker_name
+				FROM food f
+				JOIN maker m ON m.maker_id = f.maker_id
+				WHERE f.food_id = ? AND f.regist_user_id = ?
+			""";
+		
+		Map<String, Object> headerInfo = jdbc.queryForObject(
+			    sql,
+			    new Object[]{ foodId, userId },
+			    (rs, rowNum) -> {
+			        Map<String, Object> map = new HashMap<>();
+			        map.put("foodId", rs.getLong("food_id"));
+			        map.put("foodName", rs.getString("food_name"));
+			        map.put("makerId", rs.getString("maker_id"));
+			        map.put("makerName", rs.getString("maker_name"));
+			        return map;
+			    }
+			);
+		return headerInfo;
+	}
+	
+	/*
 	 * 	食べた登録画面：③：画面表示時
-	 * 	ユーザーIDと食品IDに紐づく味一覧を取得するメソッド
+	 * 	ユーザーIDと食品IDに紐づく分類一覧を取得するメソッド
 	 *	@param	userId ユーザーID 
 	 *	@param	foodId	食品ID
-	 *	@return	List<Map<String, Object>>	味一覧
+	 *	@return	List<Map<String, Object>>	分類一覧
 	 */
 	public List<Map<String, Object>> getNutritionList(String userId, long foodId){
 		String sql = """
@@ -273,10 +280,10 @@ public class IntakeRepository {
 	
 	/* 	
 	 * 	食べた登録画面：③：画面表示時
-	 * 	ユーザーIDと選択したメーカーIDに紐づく味の一覧を取得するメソッド
+	 * 	ユーザーIDと選択したメーカーIDに紐づく分類の一覧を取得するメソッド
 	 *	@param	userId ユーザーID 
 	 * 	@param	makerId	メーカーID(@RequestParamから)
-	 *	@return	List<Map<String, Object>> 味一覧
+	 *	@return	List<Map<String, Object>> 分類一覧
 	 */
 	public List<Map<String, Object>> getFoodList(String userId, long makerId){
 		String sql = """
@@ -382,7 +389,7 @@ public class IntakeRepository {
 --------------------------------------*/
 	/*
 	 * 	「登録」押下
-	 * 	ユーザーごとに味名の重複チェックを行うメソッド
+	 * 	ユーザーごとに分類名の重複チェックを行うメソッド
 	 *	@param	userId ユーザーID 
 	 * 	@param	className	登録する分類名
 	 * 	@param	foodId	食品ID
@@ -423,8 +430,9 @@ public class IntakeRepository {
  		user_idの取得・登録・更新処理
 	--------------------------------------*/
 	/*
+	 * 	user_idの存在チェックを行うメソッド
 	 *	@param	c Cookie 
-	 *	@return	userId DBと照合したユーザーID
+	 *	@return	userId DBと照合したユーザーID、存在しなければ空文字
 	 */
 	public String chkUserId(Cookie c) {
 		String userId = "";
@@ -441,6 +449,10 @@ public class IntakeRepository {
 		return userId;
 	}
 	
+	/*
+	 * 	user_idの登録を行うメソッド
+	 *	@param	userId user_id用に作成したUUID 
+	 */
 	public void registUserId(String userId) {
 		String sql = """
 	    		INSERT INTO users(user_id)
@@ -451,6 +463,10 @@ public class IntakeRepository {
 	    jdbc.update(sql, userId);
 	}
 	
+	/*
+	 * 	最終アクセス日時の更新を行うメソッド
+	 *	@param	userId user_id
+	 */
 	public void updLastAccessDate(String userId) {
 		String sql = """
 				UPDATE users

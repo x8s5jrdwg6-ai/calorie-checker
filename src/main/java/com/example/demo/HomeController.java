@@ -19,12 +19,26 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class HomeController {
-
+	/*--------------------------------------
+		定数
+	--------------------------------------*/
 	private final JdbcTemplate jdbc;
 	private final IntakeService intakeSvc;
 
 	private static final String UID_COOKIE = "cc_uid";
 
+	/*--------------------------------------
+		record
+	--------------------------------------*/
+	public record IntakeRow(long intakeId, String eatenDate, String eatenTime, double qty, String foodName, String className, int calorie) {
+		public int kcalTotal() {
+			return (int) Math.round(calorie * qty);
+		}
+	}
+	
+	/*--------------------------------------
+		共通
+	--------------------------------------*/
 	// ユーザーIDの取得・登録処理を行う
 	private String resolveUserId(HttpServletRequest req, HttpServletResponse res) {
 		// user_id取得処理
@@ -47,15 +61,6 @@ public class HomeController {
 	public HomeController(JdbcTemplate jdbc, IntakeRepository intakeRepo, IntakeService intakeSvc) {
 		this.jdbc = jdbc;
 		this.intakeSvc = intakeSvc;
-	}
-
-	/*--------------------------------------
-		record
-	--------------------------------------*/
-	public record IntakeRow(long intakeId, String eatenDate, String eatenTime, double qty, String foodName, String className, int calorie) {
-		public int kcalTotal() {
-			return (int) Math.round(calorie * qty);
-		}
 	}
 	
 	/*--------------------------------------
@@ -90,13 +95,17 @@ public class HomeController {
 	
 	// お知らせ押下時
 	@GetMapping("/info")
-	public String info() {
+	public String info(HttpServletRequest req, HttpServletResponse res) {
+		// user_id取得処理（仮）
+		String userId = resolveUserId(req, res);
 		return "information";
 	}
 	
 	// 使い方押下時
 	@GetMapping("/howto")
-	public String howToUse() {
+	public String howToUse(HttpServletRequest req, HttpServletResponse res) {
+		// user_id取得処理（仮）
+		String userId = resolveUserId(req, res);
 		return "how_to_use";
 	}
 	
@@ -221,7 +230,9 @@ public class HomeController {
 	
 	// ナビゲーション：メーカー登録押下時
 	@GetMapping("/makers/new")
-	public String makerNew() {
+	public String makerNew(HttpServletRequest req, HttpServletResponse res) {
+		// user_id取得処理（仮）
+		String userId = resolveUserId(req, res);
 		return "maker_new";
 	}
 	
@@ -308,26 +319,6 @@ public class HomeController {
 	/*--------------------------------------
 		メーカー登録画面
 	--------------------------------------*/
-//	// メーカー登録時
-//	@PostMapping("/makers/create")
-//	public String makerCreate(@RequestParam("makerName") String makerName, RedirectAttributes ra,
-//            HttpServletRequest req,
-//            HttpServletResponse res) {
-//		// user_id取得処理（仮）
-//		String userId = resolveUserId(req, res);
-//		
-//		// メーカー重複チェック
-//		if(intakeSvc.chkDepliMaker(userId, makerName) == -1) {
-//			ra.addFlashAttribute("msg", "同じメーカーが既に登録されています");
-//			return "redirect:/makers/new";
-//		}
-//		
-//		// メーカー登録
-//		intakeSvc.insFoodMaker(userId, makerName);
-//		ra.addFlashAttribute("msg", "メーカーを登録しました");
-//		return "redirect:/makers/new";
-//	}
-	
 	// メーカー登録時
 	@PostMapping("/makers/create-and-next")
 	public String makerCreateAndNext(@RequestParam("makerName") String makerName,
@@ -396,11 +387,6 @@ public class HomeController {
 		// user_id取得処理（仮）
 		String userId = resolveUserId(req, res);
 		
-//		// プレーンにチェックがあれば味を「プレーン」に固定
-//		if ("1".equals(plainFlg)) {
-//			flavorName = "プレーン";
-//		}
-
 		// 栄養情報重複チェック true：重複なし false：重複あり
 		if(!intakeSvc.chkDepliNutrition(userId, className, foodId)) {
 			ra.addFlashAttribute("errorMsg", "同じ分類の栄養情報が既に登録されています");

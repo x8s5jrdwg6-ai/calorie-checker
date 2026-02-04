@@ -5,7 +5,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -754,43 +753,38 @@ public class HomeController {
 		開発用
 	--------------------------------------*/
 	@PostMapping("/login")
-	public String editNutrition(
-			@RequestParam("password") String password,
-			HttpServletRequest req, HttpServletResponse res) {
-		
-		String hexString = "";
-		
-		try {
-			MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-			byte[] sha256Byte = sha256.digest(password.getBytes());
-			
-			//Java17以降からしか使用出来ない
-			HexFormat hex = HexFormat.of().withLowerCase();
-			hexString = hex.formatHex(sha256Byte);
-		}
-		catch (NoSuchAlgorithmException e) {
-			
-		}
-		
-//		String sql2 = """
-//				UPDATE users
-//				SET password = ?
-//				WHERE  user_id = ?
-//			""";
-//		jdbc.update(sql2, hexString, );
-		
-		String sql = """
-				SELECT EXISTS(
-					SELECT 1
-					FROM users
-				WHERE  password = ?
-				)
-			""";
-		if(jdbc.queryForObject(sql, Boolean.class, hexString)) {
-			return "redirect:/manage";
-		}
-		
-		return "redirect:/login";
+	public String login(@RequestParam("password") String password,
+	                    HttpServletRequest req) {
+
+	    String hexString = sha256Hex(password);
+
+	    String sql = """
+	        SELECT EXISTS(
+	            SELECT 1 FROM users WHERE password = ?
+	        )
+	    """;
+
+	    Boolean ok = jdbc.queryForObject(sql, Boolean.class, hexString);
+	    if (Boolean.TRUE.equals(ok)) {
+	        req.getSession(true).setAttribute("ADMIN_OK", true);  // ★ここ
+	        return "redirect:/manage";
+	    }
+	    return "redirect:/login";
+	}
+
+	private String sha256Hex(String password) {
+	    try {
+	        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+	        byte[] sha256Byte = sha256.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+	        return java.util.HexFormat.of().withLowerCase().formatHex(sha256Byte);
+	    } catch (NoSuchAlgorithmException e) {
+	        throw new RuntimeException(e);
+	    }
+	}
+	
+	private boolean isAdmin(HttpServletRequest req) {
+	    Object v = req.getSession(false) == null ? null : req.getSession(false).getAttribute("ADMIN_OK");
+	    return Boolean.TRUE.equals(v);
 	}
 	
 	@GetMapping("/login")
@@ -800,11 +794,13 @@ public class HomeController {
 	
 	@GetMapping("/manage")
 	public String manage(HttpServletRequest req, HttpServletResponse res) {
-		return "manage";
+	    if (!isAdmin(req)) return "redirect:/login";
+	    return "manage";
 	}
 	
 	@GetMapping("/manage/users")
 	public String manageUsers(Model model, HttpServletRequest req, HttpServletResponse res) {
+		if (!isAdmin(req)) return "redirect:/login";
 		String sql = """
 				SELECT *
 				FROM users
@@ -817,6 +813,7 @@ public class HomeController {
 	
 	@GetMapping("/manage/maker")
 	public String manageMaker(Model model, HttpServletRequest req, HttpServletResponse res) {
+		if (!isAdmin(req)) return "redirect:/login";
 		String sql = """
 				SELECT *
 				FROM maker
@@ -829,6 +826,7 @@ public class HomeController {
 	
 	@GetMapping("/manage/food")
 	public String manageFood(Model model, HttpServletRequest req, HttpServletResponse res) {
+		if (!isAdmin(req)) return "redirect:/login";
 		String sql = """
 				SELECT *
 				FROM food
@@ -841,6 +839,7 @@ public class HomeController {
 	
 	@GetMapping("/manage/nutrition")
 	public String manageNutrition(Model model, HttpServletRequest req, HttpServletResponse res) {
+		if (!isAdmin(req)) return "redirect:/login";
 		String sql = """
 				SELECT *
 				FROM nutrition
@@ -853,6 +852,7 @@ public class HomeController {
 	
 	@GetMapping("/manage/intake")
 	public String manageIntake(Model model, HttpServletRequest req, HttpServletResponse res) {
+		if (!isAdmin(req)) return "redirect:/login";
 		String sql = """
 				SELECT *
 				FROM intake

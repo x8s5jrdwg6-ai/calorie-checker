@@ -1,8 +1,11 @@
 package com.example.demo;
 
 import java.math.BigDecimal;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -739,4 +742,125 @@ public class HomeController {
 		
 		return "redirect:/list/nutrition";
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	/*--------------------------------------
+		開発用
+	--------------------------------------*/
+	@PostMapping("/login")
+	public String editNutrition(
+			@RequestParam("password") String password,
+			HttpServletRequest req, HttpServletResponse res) {
+		
+		String hexString = "";
+		
+		try {
+			MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+			byte[] sha256Byte = sha256.digest(password.getBytes());
+			
+			//Java17以降からしか使用出来ない
+			HexFormat hex = HexFormat.of().withLowerCase();
+			hexString = hex.formatHex(sha256Byte);
+		}
+		catch (NoSuchAlgorithmException e) {
+			
+		}
+		
+//		String sql2 = """
+//				UPDATE users
+//				SET password = ?
+//				WHERE  user_id = ?
+//			""";
+//		jdbc.update(sql2, hexString, );
+		
+		String sql = """
+				SELECT EXISTS(
+					SELECT 1
+					FROM users
+				WHERE  password = ?
+				)
+			""";
+		if(jdbc.queryForObject(sql, Boolean.class, hexString)) {
+			return "redirect:/manage";
+		}
+		
+		return "redirect:/login";
+	}
+	
+	@GetMapping("/login")
+	public String login(HttpServletRequest req, HttpServletResponse res) {
+		return "login";
+	}
+	
+	@GetMapping("/manage")
+	public String manage(HttpServletRequest req, HttpServletResponse res) {
+		return "manage";
+	}
+	
+	@GetMapping("/manage/users")
+	public String manageUsers(Model model, HttpServletRequest req, HttpServletResponse res) {
+		String sql = """
+				SELECT *
+				FROM users
+				ORDER BY last_access_date DESC
+			""";
+		List<Map<String, Object>> dataList = jdbc.queryForList(sql);
+		model.addAttribute("dataList", dataList);
+		return "manage_users";
+	}
+	
+	@GetMapping("/manage/maker")
+	public String manageMaker(Model model, HttpServletRequest req, HttpServletResponse res) {
+		String sql = """
+				SELECT *
+				FROM maker
+				ORDER BY maker_id DESC
+			""";
+		List<Map<String, Object>> dataList = jdbc.queryForList(sql);
+		model.addAttribute("dataList", dataList);
+		return "manage_maker";
+	}
+	
+	@GetMapping("/manage/food")
+	public String manageFood(Model model, HttpServletRequest req, HttpServletResponse res) {
+		String sql = """
+				SELECT *
+				FROM food
+				ORDER BY food_id DESC
+			""";
+		List<Map<String, Object>> dataList = jdbc.queryForList(sql);
+		model.addAttribute("dataList", dataList);
+		return "manage_food";
+	}
+	
+	@GetMapping("/manage/nutrition")
+	public String manageNutrition(Model model, HttpServletRequest req, HttpServletResponse res) {
+		String sql = """
+				SELECT *
+				FROM nutrition
+				ORDER BY nutrition_id DESC
+			""";
+		List<Map<String, Object>> dataList = jdbc.queryForList(sql);
+		model.addAttribute("dataList", dataList);
+		return "manage_nutrition";
+	}
+	
+	@GetMapping("/manage/intake")
+	public String manageIntake(Model model, HttpServletRequest req, HttpServletResponse res) {
+		String sql = """
+				SELECT *
+				FROM intake
+				ORDER BY intake_id DESC
+			""";
+		List<Map<String, Object>> dataList = jdbc.queryForList(sql);
+		model.addAttribute("dataList", dataList);
+		return "manage_intake";
+	}
+	
 }
